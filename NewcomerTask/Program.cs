@@ -32,6 +32,7 @@ namespace NewcomerTask
         public void AddNewTask(string info) => _tasks.Add(new Task(info));
         
         public Task GetAt(int idx) => _tasks[idx];
+        public int Length => _tasks.Count;
 
         public void PrintAllTasks()
         {

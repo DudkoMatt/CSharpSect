@@ -54,14 +54,18 @@ namespace NewcomerTask
             
         }
 
-        public void MarkCompleted()
+        public void MarkCompleted(ulong id)
         {
-            
+            var tmp = _tasks.Find(task => task.Id == id);
+            if (tmp != null) tmp.Completed = true;
         }
 
         public void PrintCompleted()
         {
+            Console.WriteLine("  ID  | Done? | Info");
             
+            foreach (var task in _tasks.Where(task => task.Completed))
+                Console.WriteLine($" {task.Id, -5}|   {(task.Completed ? "x" : " ")}   | {task.Info}");
         }
     }
     

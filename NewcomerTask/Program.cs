@@ -41,10 +41,7 @@ namespace NewcomerTask
                 Console.WriteLine($" {task.Id, -5}|   {(task.Completed ? "x" : " ")}   | {task.Info}");
         }
 
-        public void DeleteTask()
-        {
-            
-        }
+        public void DeleteTask(ulong id) => _tasks.RemoveAll(task => task.Id == id);
 
         public void SaveToFile()
         {

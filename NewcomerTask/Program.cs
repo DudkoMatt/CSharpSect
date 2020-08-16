@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace NewcomerTask
 {
@@ -19,6 +21,7 @@ namespace NewcomerTask
             Completed = false;
         }
         
+        [JsonConstructor]
         public Task(string info, ulong id)
         {
             Id = id;
@@ -30,6 +33,7 @@ namespace NewcomerTask
     
     public class TaskHandler
     {
+        [JsonRequired]
         private List<Task> _tasks;
 
         public TaskHandler()
@@ -40,6 +44,8 @@ namespace NewcomerTask
         public void AddNewTask(string info) => _tasks.Add(new Task(info));
         
         public Task GetAt(int idx) => _tasks[idx];
+        
+        [JsonIgnore]
         public int Length => _tasks.Count;
 
         public void PrintAllTasks()
@@ -52,14 +58,20 @@ namespace NewcomerTask
 
         public void DeleteTask(ulong id) => _tasks.RemoveAll(task => task.Id == id);
 
-        public void SaveToFile()
+        public void SaveToFile(string filename)
         {
-            
+            using (var f = File.CreateText(filename))
+            {
+                f.Write(JsonConvert.SerializeObject(this));
+            }
         }
 
-        public void LoadFromFile()
+        public static TaskHandler LoadFromFile(string filename)
         {
-            
+            using (var f = File.OpenText(filename))
+            {
+                return JsonConvert.DeserializeObject<TaskHandler>(f.ReadToEnd());
+            }
         }
 
         public void MarkCompleted(ulong id)

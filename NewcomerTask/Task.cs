@@ -21,7 +21,7 @@ namespace NewcomerTask
         public Task(string info, ulong id)
         {
             Id = id;
-            _nextTaskId = _nextTaskId < id ? id + 1 : _nextTaskId;
+            _nextTaskId = _nextTaskId <= id ? id + 1 : _nextTaskId;
             Info = info;
             Completed = false;
         }

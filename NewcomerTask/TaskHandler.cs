@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Newtonsoft.Json;
 
 namespace NewcomerTask
@@ -21,12 +21,14 @@ namespace NewcomerTask
         
         public int Length => _tasks.Count;
 
-        public void PrintAllTasks()
+        public string PrintAllTasks()
         {
-            Console.WriteLine("  ID  | Done? | Info");
-            
+            var result = new StringBuilder("  ID  | Done? | Info\n");
+
             foreach (var task in _tasks.OrderBy(task => task.Completed))
-                Console.WriteLine($" {task.Id, -5}|   {(task.Completed ? "x" : " ")}   | {task.Info}");
+                result.Append($" {task.Id, -5}|   {(task.Completed ? "x" : " ")}   | {task.Info}\n");
+
+            return result.ToString();
         }
 
         public void DeleteTask(ulong id) => _tasks.RemoveAll(task => task.Id == id);
@@ -53,12 +55,14 @@ namespace NewcomerTask
             if (tmp != null) tmp.Completed = true;
         }
 
-        public void PrintCompleted()
+        public string PrintCompleted()
         {
-            Console.WriteLine("  ID  | Done? | Info");
+            var result = new StringBuilder("  ID  | Done? | Info\n");
             
             foreach (var task in _tasks.Where(task => task.Completed))
-                Console.WriteLine($" {task.Id, -5}|   {(task.Completed ? "x" : " ")}   | {task.Info}");
+                result.Append($" {task.Id, -5}|   {(task.Completed ? "x" : " ")}   | {task.Info}\n");
+
+            return result.ToString();
         }
     }
 }

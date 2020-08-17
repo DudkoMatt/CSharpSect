@@ -41,7 +41,7 @@ namespace NewcomerTask
                             Console.WriteLine("There should be description");
                         break;
                     case "/all":
-                        taskHandler.PrintAllTasks();
+                        Console.WriteLine(taskHandler.PrintAllTasks());
                         break;
                     case "/delete":
                         if (args.Length > 1)
@@ -77,7 +77,7 @@ namespace NewcomerTask
                             Console.WriteLine("There should be id");
                         break;
                     case "/completed":
-                        taskHandler.PrintCompleted();
+                        Console.WriteLine(taskHandler.PrintCompleted());
                         break;
                     case "/exit":
                         running = false;

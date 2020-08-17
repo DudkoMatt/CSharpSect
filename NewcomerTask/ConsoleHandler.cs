@@ -20,7 +20,7 @@ namespace NewcomerTask
             Console.WriteLine("/help");
             Console.WriteLine("/exit");
         }
-        public static void Run(ref TaskHandler taskHandler)
+        public static void Run(TaskHandler taskHandler)
         {
             Hello();
             var running = true;

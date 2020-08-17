@@ -5,7 +5,7 @@
         static void Main(string[] args)
         {
             var taskHandler = new TaskHandler();
-            ConsoleHandler.Run(ref taskHandler);
+            ConsoleHandler.Run(taskHandler);
         }
     }
 }

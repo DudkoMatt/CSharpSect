@@ -61,7 +61,7 @@ namespace NewcomerTask
                     case "/load":
                         if (args.Length > 1)
                             if (File.Exists(line.Substring(line.IndexOf(' '))))
-                                taskHandler = TaskHandler.LoadFromFile(line.Substring(line.IndexOf(' ')));
+                                taskHandler.LoadFromFile(line.Substring(line.IndexOf(' ')));
                             else
                                 Console.WriteLine("File doesn't exists");
                         else

@@ -8,7 +8,6 @@ namespace NewcomerTask
 {
     public class TaskHandler
     {
-        [JsonRequired]
         private List<Task> _tasks;
 
         public TaskHandler()
@@ -20,7 +19,6 @@ namespace NewcomerTask
         
         public Task GetAt(int idx) => _tasks[idx];
         
-        [JsonIgnore]
         public int Length => _tasks.Count;
 
         public void PrintAllTasks()
@@ -37,15 +35,15 @@ namespace NewcomerTask
         {
             using (var f = File.CreateText(filename))
             {
-                f.Write(JsonConvert.SerializeObject(this));
+                f.Write(JsonConvert.SerializeObject(_tasks));
             }
         }
 
-        public static TaskHandler LoadFromFile(string filename)
+        public void LoadFromFile(string filename)
         {
             using (var f = File.OpenText(filename))
             {
-                return JsonConvert.DeserializeObject<TaskHandler>(f.ReadToEnd());
+                _tasks = JsonConvert.DeserializeObject<List<Task>>(f.ReadToEnd());
             }
         }
 

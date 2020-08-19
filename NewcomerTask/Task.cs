@@ -18,7 +18,7 @@ namespace NewcomerTask
         }
         
         [JsonConstructor]
-        public Task(string info, ulong id)
+        private Task(string info, ulong id, DateTime deadline)
         {
             Id = id;
             _nextTaskId = _nextTaskId <= id ? id + 1 : _nextTaskId;

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 
 namespace NewcomerTask
 {
@@ -9,12 +10,14 @@ namespace NewcomerTask
         public string Info { get; set; }
         public bool Completed { get; set; }
         public ulong Id { get; }
+        public DateTime Deadline { get; set; }
 
-        public Task(string info)
+        public Task(string info, DateTime deadline = default)
         {
             Id = _nextTaskId++;
             Info = info;
             Completed = false;
+            Deadline = deadline;
         }
         
         [JsonConstructor]
@@ -24,6 +27,7 @@ namespace NewcomerTask
             _nextTaskId = _nextTaskId <= id ? id + 1 : _nextTaskId;
             Info = info;
             Completed = false;
+            Deadline = deadline;
         }
     }
 }

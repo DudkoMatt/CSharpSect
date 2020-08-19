@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -15,7 +16,7 @@ namespace NewcomerTask
             _tasks = new List<Task>();
         }
         
-        public void AddNewTask(string info) => _tasks.Add(new Task(info));
+        public void AddNewTask(string info, DateTime deadline = default) => _tasks.Add(new Task(info, deadline));
         
         public Task GetAt(int idx) => _tasks[idx];
         
@@ -23,10 +24,11 @@ namespace NewcomerTask
 
         public string PrintAllTasks()
         {
-            var result = new StringBuilder("  ID  | Done? | Info\n");
+            var result = new StringBuilder("  ID  | Done? |  Deadline  | Info\n");
 
             foreach (var task in _tasks.OrderBy(task => task.Completed))
-                result.Append($" {task.Id, -5}|   {(task.Completed ? "x" : " ")}   | {task.Info}\n");
+                result.Append($" {task.Id, -5}|   {(task.Completed ? "x" : " ")}   | " +
+                              $"{(task.Deadline == DateTime.MinValue ? "          " : task.Deadline.ToShortDateString())} | {task.Info}\n");
 
             return result.ToString();
         }
@@ -57,10 +59,30 @@ namespace NewcomerTask
 
         public string PrintCompleted()
         {
-            var result = new StringBuilder("  ID  | Done? | Info\n");
+            var result = new StringBuilder("  ID  | Done? |  Deadline  | Info\n");
             
             foreach (var task in _tasks.Where(task => task.Completed))
-                result.Append($" {task.Id, -5}|   {(task.Completed ? "x" : " ")}   | {task.Info}\n");
+                result.Append($" {task.Id, -5}|   {(task.Completed ? "x" : " ")}   | " +
+                              $"{(task.Deadline == DateTime.MinValue ? "          " : task.Deadline.ToShortDateString())} | {task.Info}\n");
+
+            return result.ToString();
+        }
+
+        public void SetDeadline(ulong id, DateTime deadline)
+        {
+            var tmp = _tasks.Find(task => task.Id == id);
+            if (tmp != null) tmp.Deadline = deadline;
+        }
+
+        public void RemoveDeadline(ulong id) => SetDeadline(id, DateTime.MinValue);
+
+        public string Today()
+        {
+            var result = new StringBuilder("  ID  | Done? |  Deadline  | Info\n");
+            
+            foreach (var task in _tasks.Where(task => task.Deadline.Date == DateTime.Today))
+                result.Append($" {task.Id, -5}|   {(task.Completed ? "x" : " ")}   | " +
+                              $"{(task.Deadline == DateTime.MinValue ? "          " : task.Deadline.ToShortDateString())} | {task.Info}\n");
 
             return result.ToString();
         }

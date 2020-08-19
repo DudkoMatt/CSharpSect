@@ -16,12 +16,48 @@ namespace NewcomerTask
             _tasks = new List<Task>();
         }
         
-        public void AddNewTask(string info, DateTime deadline = default) => _tasks.Add(new Task(info, deadline));
-        
+        public int Length => _tasks.Count;
         public Task GetAt(int idx) => _tasks[idx];
         
-        public int Length => _tasks.Count;
+        // Creation/removal handling
+        public void AddNewTask(string info, DateTime deadline = default) => _tasks.Add(new Task(info, deadline));
+        
+        public void DeleteTask(ulong id) => _tasks.RemoveAll(task => task.Id == id);
+        
+        // File handling
+        public void SaveToFile(string filename)
+        {
+            using (var f = File.CreateText(filename))
+            {
+                f.Write(JsonConvert.SerializeObject(_tasks));
+            }
+        }
+        
+        public void LoadFromFile(string filename)
+        {
+            using (var f = File.OpenText(filename))
+            {
+                _tasks = JsonConvert.DeserializeObject<List<Task>>(f.ReadToEnd());
+            }
+        }
 
+        // Complete handling
+        public void MarkCompleted(ulong id)
+        {
+            var tmp = _tasks.Find(task => task.Id == id);
+            if (tmp != null) tmp.Completed = true;
+        }
+
+        // Deadline handling
+        public void SetDeadline(ulong id, DateTime deadline)
+        {
+            var tmp = _tasks.Find(task => task.Id == id);
+            if (tmp != null) tmp.Deadline = deadline;
+        }
+        
+        public void RemoveDeadline(ulong id) => SetDeadline(id, DateTime.MinValue);
+        
+        // Printing
         public string PrintAllTasks()
         {
             var result = new StringBuilder("  ID  | Done? |  Deadline  | Info\n");
@@ -31,30 +67,6 @@ namespace NewcomerTask
                               $"{(task.Deadline == DateTime.MinValue ? "          " : task.Deadline.ToShortDateString())} | {task.Info}\n");
 
             return result.ToString();
-        }
-
-        public void DeleteTask(ulong id) => _tasks.RemoveAll(task => task.Id == id);
-
-        public void SaveToFile(string filename)
-        {
-            using (var f = File.CreateText(filename))
-            {
-                f.Write(JsonConvert.SerializeObject(_tasks));
-            }
-        }
-
-        public void LoadFromFile(string filename)
-        {
-            using (var f = File.OpenText(filename))
-            {
-                _tasks = JsonConvert.DeserializeObject<List<Task>>(f.ReadToEnd());
-            }
-        }
-
-        public void MarkCompleted(ulong id)
-        {
-            var tmp = _tasks.Find(task => task.Id == id);
-            if (tmp != null) tmp.Completed = true;
         }
 
         public string PrintCompleted()
@@ -67,14 +79,6 @@ namespace NewcomerTask
 
             return result.ToString();
         }
-
-        public void SetDeadline(ulong id, DateTime deadline)
-        {
-            var tmp = _tasks.Find(task => task.Id == id);
-            if (tmp != null) tmp.Deadline = deadline;
-        }
-
-        public void RemoveDeadline(ulong id) => SetDeadline(id, DateTime.MinValue);
 
         public string Today()
         {

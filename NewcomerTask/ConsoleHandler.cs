@@ -25,6 +25,11 @@ namespace NewcomerTask
                 {"/load", Load},
                 {"/complete", Complete},
                 {"/completed", Completed},
+                
+                {"/today", Today},
+                {"/add-deadline", AddDeadline},
+                {"/remove-deadline", RemoveDeadline},
+                
                 {"/help", Help},
                 {"/exit", Exit}
             };
@@ -56,6 +61,11 @@ namespace NewcomerTask
             Console.WriteLine("/load file-name.txt");
             Console.WriteLine("/complete id");
             Console.WriteLine("/completed");
+
+            Console.WriteLine("/today");
+            Console.WriteLine("/add-deadline id DD.MM.YYYY");
+            Console.WriteLine("/remove-deadline id");
+
             Console.WriteLine("/help");
             Console.WriteLine("/exit");
         }
@@ -126,5 +136,42 @@ namespace NewcomerTask
         private void Completed() => Console.WriteLine(_taskHandler.PrintCompleted());
 
         private void Exit() => _running = false;
+        
+        private void AddDeadline()
+        {
+            if (_args.Length == 3)
+            {
+                var date = _args[2].Split('.');
+                if (ulong.TryParse(_args[1], out var id) 
+                    && int.TryParse(date[0], out var day)
+                    && int.TryParse(date[1], out var month)
+                    && int.TryParse(date[2], out var year))
+                    try
+                    {
+                        _taskHandler.SetDeadline(id, new DateTime(year, month, day));
+                    }
+                    catch (ArgumentOutOfRangeException)
+                    {
+                        Console.WriteLine("Date is out of range. Format: DD.MM.YYYY");
+                    }
+                else
+                    Console.WriteLine("Cannot parse command. See /help for syntax");
+            }
+            else
+                Console.WriteLine("Wrong syntax. See /help for syntax");
+        }
+
+        private void RemoveDeadline()
+        {
+            if (_args.Length > 1)
+                if (ulong.TryParse(_args[1], out var res))
+                    _taskHandler.RemoveDeadline(res);
+                else
+                    Console.WriteLine("Cannot convert id");
+            else
+                Console.WriteLine("There should be id");
+        }
+        
+        private void Today() => Console.WriteLine(_taskHandler.Today());
     }
 }

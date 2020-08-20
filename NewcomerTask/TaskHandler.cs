@@ -73,6 +73,6 @@ namespace NewcomerTask
 
         public string PrintCompleted() => _Print(_tasks.Where(task => task.Completed));
 
-        public string Today() => _Print(_tasks.Where(task => task.Deadline.Date == DateTime.Today));
+        public string Today() => _Print(_tasks.Where(task => task.Deadline.Date == DateTime.Today).OrderBy(task => task.Completed));
     }
 }

@@ -58,37 +58,21 @@ namespace NewcomerTask
         public void RemoveDeadline(ulong id) => SetDeadline(id, DateTime.MinValue);
         
         // Printing
-        public string PrintAllTasks()
+        private static string _Print(IEnumerable<Task> tasks)
         {
             var result = new StringBuilder("  ID  | Done? |  Deadline  | Info\n");
 
-            foreach (var task in _tasks.OrderBy(task => task.Completed))
+            foreach (var task in tasks)
                 result.Append($" {task.Id, -5}|   {(task.Completed ? "x" : " ")}   | " +
                               $"{(task.Deadline == DateTime.MinValue ? "          " : task.Deadline.ToShortDateString())} | {task.Info}\n");
 
             return result.ToString();
         }
+        
+        public string PrintAllTasks() => _Print(_tasks.OrderBy(task => task.Completed));
 
-        public string PrintCompleted()
-        {
-            var result = new StringBuilder("  ID  | Done? |  Deadline  | Info\n");
-            
-            foreach (var task in _tasks.Where(task => task.Completed))
-                result.Append($" {task.Id, -5}|   {(task.Completed ? "x" : " ")}   | " +
-                              $"{(task.Deadline == DateTime.MinValue ? "          " : task.Deadline.ToShortDateString())} | {task.Info}\n");
+        public string PrintCompleted() => _Print(_tasks.Where(task => task.Completed));
 
-            return result.ToString();
-        }
-
-        public string Today()
-        {
-            var result = new StringBuilder("  ID  | Done? |  Deadline  | Info\n");
-            
-            foreach (var task in _tasks.Where(task => task.Deadline.Date == DateTime.Today))
-                result.Append($" {task.Id, -5}|   {(task.Completed ? "x" : " ")}   | " +
-                              $"{(task.Deadline == DateTime.MinValue ? "          " : task.Deadline.ToShortDateString())} | {task.Info}\n");
-
-            return result.ToString();
-        }
+        public string Today() => _Print(_tasks.Where(task => task.Deadline.Date == DateTime.Today));
     }
 }

@@ -9,21 +9,26 @@ namespace NewcomerTask
 {
     public class TaskHandler
     {
-        private List<Task> _tasks;
+        private Dictionary<ulong, Task> _tasks;
 
         public TaskHandler()
         {
-            _tasks = new List<Task>();
+            _tasks = new Dictionary<ulong, Task>();
         }
-        
-        public int Length => _tasks.Count;
-        public Task GetAt(int idx) => _tasks[idx];
-        
+
         // Creation/removal handling
-        public void AddNewTask(string info, DateTime deadline = default) => _tasks.Add(new Task(info, deadline));
-        
-        public void DeleteTask(ulong id) => _tasks.RemoveAll(task => task.Id == id);
-        
+        public void AddNewTask(string info, DateTime deadline = default)
+        {
+            var task = new Task(info, deadline);
+            _tasks.Add(task.Id, task);
+        }
+
+        public void DeleteTask(ulong id)
+        {
+            if (_tasks.ContainsKey(id))
+                _tasks.Remove(id);
+        }
+
         // File handling
         public void SaveToFile(string filename)
         {
@@ -37,22 +42,20 @@ namespace NewcomerTask
         {
             using (var f = File.OpenText(filename))
             {
-                _tasks = JsonConvert.DeserializeObject<List<Task>>(f.ReadToEnd());
+                _tasks = JsonConvert.DeserializeObject<Dictionary<ulong, Task>>(f.ReadToEnd());
             }
         }
 
         // Complete handling
         public void MarkCompleted(ulong id)
         {
-            var tmp = _tasks.Find(task => task.Id == id);
-            if (tmp != null) tmp.Completed = true;
+            if (_tasks.ContainsKey(id)) _tasks[id].Completed = true;
         }
 
         // Deadline handling
         public void SetDeadline(ulong id, DateTime deadline)
         {
-            var tmp = _tasks.Find(task => task.Id == id);
-            if (tmp != null) tmp.Deadline = deadline;
+            if (_tasks.ContainsKey(id)) _tasks[id].Deadline = deadline;
         }
         
         public void RemoveDeadline(ulong id) => SetDeadline(id, DateTime.MinValue);
@@ -69,10 +72,10 @@ namespace NewcomerTask
             return result.ToString();
         }
         
-        public string PrintAllTasks() => _Print(_tasks.OrderBy(task => task.Completed));
+        public string PrintAllTasks() => _Print(_tasks.Values.OrderBy(task => task.Completed));
 
-        public string PrintCompleted() => _Print(_tasks.Where(task => task.Completed));
+        public string PrintCompleted() => _Print(_tasks.Values.Where(task => task.Completed));
 
-        public string Today() => _Print(_tasks.Where(task => task.Deadline.Date == DateTime.Today).OrderBy(task => task.Completed));
+        public string Today() => _Print(_tasks.Values.Where(task => task.Deadline.Date == DateTime.Today).OrderBy(task => task.Completed));
     }
 }

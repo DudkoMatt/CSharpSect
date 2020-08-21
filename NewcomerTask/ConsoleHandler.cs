@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace NewcomerTask
 {
@@ -30,6 +31,12 @@ namespace NewcomerTask
                 {"/add-deadline", AddDeadline},
                 {"/remove-deadline", RemoveDeadline},
                 
+                {"/groups", Groups},
+                {"/create-group", CreateGroup},
+                {"/delete-group", DeleteGroup},
+                {"/add-to-group", AddToGroup},
+                {"/delete-from-group", DeleteFromGroup},
+                
                 {"/help", Help},
                 {"/exit", Exit}
             };
@@ -55,17 +62,26 @@ namespace NewcomerTask
             Console.WriteLine();
             Console.WriteLine("Available commands:");
             Console.WriteLine("/add task-info");
-            Console.WriteLine("/all");
+            Console.WriteLine("/all [group-name]");
             Console.WriteLine("/delete id");
             Console.WriteLine("/save file-name.txt");
             Console.WriteLine("/load file-name.txt");
             Console.WriteLine("/complete id");
-            Console.WriteLine("/completed");
+            Console.WriteLine("/completed [group-name]");
 
+            Console.WriteLine();
             Console.WriteLine("/today");
             Console.WriteLine("/add-deadline id DD.MM.YYYY");
             Console.WriteLine("/remove-deadline id");
 
+            Console.WriteLine();
+            Console.WriteLine("/groups");
+            Console.WriteLine("/create-group group-name");
+            Console.WriteLine("/delete-group group-name");
+            Console.WriteLine("/add-to-group id group-name");
+            Console.WriteLine("/delete-from-group id group-name");
+            
+            Console.WriteLine();
             Console.WriteLine("/help");
             Console.WriteLine("/exit");
         }
@@ -77,8 +93,10 @@ namespace NewcomerTask
             
             _line = Console.ReadLine();
             if (_line == null) return;
+
+            _line = _line.Trim();
             
-            _args = _line.Split();
+            _args = Regex.Split(_line, @"\s+");
             command = _args[0];
         }
 
@@ -90,11 +108,14 @@ namespace NewcomerTask
                 Console.WriteLine("There should be description");
         }
         
-        private void All() => Console.WriteLine(_taskHandler.PrintAllTasks());
+        private void All() =>
+            Console.WriteLine(_args.Length == 1
+                ? _taskHandler.PrintAllTasks()
+                : _taskHandler.PrintAllGroup(_args[1]));
 
         private void Delete()
         {
-            if (_args.Length > 1)
+            if (_args.Length == 2)
                 if (ulong.TryParse(_args[1], out var res))
                     _taskHandler.DeleteTask(res);
                 else
@@ -105,17 +126,17 @@ namespace NewcomerTask
         
         private void Save()
         {
-            if (_args.Length > 1)
-                _taskHandler.SaveToFile(_line.Substring(_line.IndexOf(' ')));
+            if (_args.Length == 2)
+                _taskHandler.SaveToFile(_args[1]);
             else
                 Console.WriteLine("There should be a name of file");
         }
         
         private void Load()
         {
-            if (_args.Length > 1)
-                if (File.Exists(_line.Substring(_line.IndexOf(' '))))
-                    _taskHandler.LoadFromFile(_line.Substring(_line.IndexOf(' ')));
+            if (_args.Length == 2)
+                if (File.Exists(_args[1]))
+                    _taskHandler.LoadFromFile(_args[1]);
                 else
                     Console.WriteLine("File doesn't exists");
             else
@@ -124,7 +145,7 @@ namespace NewcomerTask
         
         private void Complete()
         {
-            if (_args.Length > 1)
+            if (_args.Length == 2)
                 if (ulong.TryParse(_args[1], out var res))
                     _taskHandler.MarkCompleted(res);
                 else
@@ -133,7 +154,10 @@ namespace NewcomerTask
                 Console.WriteLine("There should be id");
         }
         
-        private void Completed() => Console.WriteLine(_taskHandler.PrintCompleted());
+        private void Completed() =>
+            Console.WriteLine(_args.Length == 2
+                ? _taskHandler.PrintCompletedFromGroup(_args[1])
+                : _taskHandler.PrintCompleted());
 
         private void Exit() => _running = false;
         
@@ -163,7 +187,7 @@ namespace NewcomerTask
 
         private void RemoveDeadline()
         {
-            if (_args.Length > 1)
+            if (_args.Length == 2)
                 if (ulong.TryParse(_args[1], out var res))
                     _taskHandler.RemoveDeadline(res);
                 else
@@ -173,5 +197,49 @@ namespace NewcomerTask
         }
         
         private void Today() => Console.WriteLine(_taskHandler.Today());
+
+        private void Groups() => Console.WriteLine(_taskHandler.Groups());
+        
+        private void CreateGroup()
+        {
+            if (_args.Length == 2)
+                _taskHandler.CreateGroup(_args[1]);
+            else
+                Console.WriteLine("There should be a name of group");
+        }
+
+        private void DeleteGroup()
+        {
+            if (_args.Length == 2)
+                _taskHandler.DeleteGroup(_args[1]);
+            else
+                Console.WriteLine("There should be a name of group");
+        }
+
+        private void AddToGroup()
+        {
+            if (_args.Length == 3)
+            {
+                if (ulong.TryParse(_args[1], out var id))
+                    _taskHandler.AddToGroup(id, _args[2]);
+                else
+                    Console.WriteLine("Cannot parse id. See /help for syntax");
+            }
+            else
+                Console.WriteLine("Wrong syntax. See /help for syntax");
+        }
+
+        private void DeleteFromGroup()
+        {
+            if (_args.Length == 3)
+            {
+                if (ulong.TryParse(_args[1], out var id))
+                    _taskHandler.DeleteFromGroup(id, _args[2]);
+                else
+                    Console.WriteLine("Cannot parse id. See /help for syntax");
+            }
+            else
+                Console.WriteLine("Wrong syntax. See /help for syntax");
+        }
     }
 }

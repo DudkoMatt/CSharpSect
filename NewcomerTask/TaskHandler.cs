@@ -63,9 +63,9 @@ namespace NewcomerTask
         public void RemoveDeadline(ulong id) => SetDeadline(id, DateTime.MinValue);
         
         // Printing
-        private static string _taskStringFormat(Task task) => $" {task.Id,-5}|   {(task.Completed ? "x" : " ")}   | {(task.Deadline == DateTime.MinValue ? "          " : task.Deadline.ToShortDateString())} | {task.Info}";
         private const string Header = "  ID  | Done? |  Deadline  | Info\n";
-        
+        private static string _taskStringFormat(Task task) => $" {task.Id,-5}|   {(task.Completed ? "x" : " ")}   | {(task.Deadline == DateTime.MinValue ? "          " : task.Deadline.ToShortDateString())} | {task.Info}";
+
         private string _Print(IEnumerable<Task> tasks)
         {
             var result = new StringBuilder(Header);
@@ -101,11 +101,9 @@ namespace NewcomerTask
             }
 
             var notInAnyGroupTasks = new StringBuilder();
+            notInAnyGroupTasks.Append(_Print(_tasks.Where(task => !usedTasks.Contains(task.Value.Id)).Select(task => task.Value)));
 
-            foreach (var task in _tasks.Where(task => !usedTasks.Contains(task.Value.Id)))
-                notInAnyGroupTasks.AppendLine(_taskStringFormat(task.Value));
-
-            if (notInAnyGroupTasks.Length != 0) result.AppendLine("Not in any group:").Append(Header).Append(notInAnyGroupTasks);
+            if (notInAnyGroupTasks.Length != Header.Length) result.AppendLine("Not in any group:").Append(notInAnyGroupTasks);
 
             return result.ToString();
         }

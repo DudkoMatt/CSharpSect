@@ -37,6 +37,8 @@ namespace NewcomerTask
                 {"/add-to-group", AddToGroup},
                 {"/delete-from-group", DeleteFromGroup},
                 
+                {"/add-subtask", AddSubTask},
+                
                 {"/help", Help},
                 {"/exit", Exit}
             };
@@ -80,6 +82,9 @@ namespace NewcomerTask
             Console.WriteLine("/delete-group group-name");
             Console.WriteLine("/add-to-group id group-name");
             Console.WriteLine("/delete-from-group id group-name");
+            
+            Console.WriteLine();
+            Console.WriteLine("/add-subtask id subtask-info");
             
             Console.WriteLine();
             Console.WriteLine("/help");
@@ -178,6 +183,10 @@ namespace NewcomerTask
                     {
                         Console.WriteLine("Date is out of range. Format: DD.MM.YYYY");
                     }
+                    catch (InvalidDataException e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
                 else
                     Console.WriteLine("Cannot parse command. See /help for syntax");
             }
@@ -235,6 +244,19 @@ namespace NewcomerTask
             {
                 if (ulong.TryParse(_args[1], out var id))
                     _taskHandler.DeleteFromGroup(id, _args[2]);
+                else
+                    Console.WriteLine("Cannot parse id. See /help for syntax");
+            }
+            else
+                Console.WriteLine("Wrong syntax. See /help for syntax");
+        }
+
+        private void AddSubTask()
+        {
+            if (_args.Length > 2)
+            {
+                if (ulong.TryParse(_args[1], out var id))
+                    _taskHandler.AddSubTask(id, _line.Substring(_line.IndexOf(' ', _line.IndexOf(' ') + 1) + 1));
                 else
                     Console.WriteLine("Cannot parse id. See /help for syntax");
             }

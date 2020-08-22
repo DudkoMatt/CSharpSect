@@ -19,16 +19,23 @@ namespace NewcomerTask
         }
 
         // Creation/removal handling
-        public void AddNewTask(string info, DateTime deadline = default)
+        public ulong AddNewTask(string info, DateTime deadline = default, ulong parent = 0)
         {
-            var task = new Task(info, deadline);
+            var task = new Task(info, deadline, parent);
             _tasks.Add(task.Id, task);
+            return task.Id;
         }
 
         public void DeleteTask(ulong id)
         {
             if (_tasks.ContainsKey(id))
                 _tasks.Remove(id);
+        }
+
+        public void AddSubTask(ulong mainTaskId, string info, DateTime deadline = default)
+        {
+            var subTaskId = AddNewTask(info, deadline, mainTaskId);
+            _tasks[mainTaskId].SubTasks.Add(subTaskId);
         }
 
         // File handling
@@ -57,21 +64,54 @@ namespace NewcomerTask
         // Deadline handling
         public void SetDeadline(ulong id, DateTime deadline)
         {
-            if (_tasks.ContainsKey(id)) _tasks[id].Deadline = deadline;
+            if (!_tasks.ContainsKey(id)) return;
+            if (_tasks[id].IsSubTask && deadline <= _tasks[_tasks[id].Parent].Deadline)
+                throw new InvalidDataException("Subtask deadline cannot be further than main task deadline");
+            _tasks[id].Deadline = deadline;
         }
         
         public void RemoveDeadline(ulong id) => SetDeadline(id, DateTime.MinValue);
         
         // Printing
         private const string Header = "  ID  | Done? |  Deadline  | Info\n";
-        private static string _taskStringFormat(Task task) => $" {task.Id,-5}|   {(task.Completed ? "x" : " ")}   | {(task.Deadline == DateTime.MinValue ? "          " : task.Deadline.ToShortDateString())} | {task.Info}";
+        private string _taskStringFormat(Task task) =>
+            $" {task.Id,-5}|" +
+            $@"{(
+                task.Completed 
+                    ? "   x   "
+                    : task.SubTasks.Count > 0 
+                        ? $" {task.SubTasks.Select(taskId => _tasks[taskId]).Aggregate(0, (total, funcTask) => funcTask.Completed ? total += 1 : 0), 2}/{task.SubTasks.Count, -2} " 
+                        : "       "
+                )}| " +
+            $"{(task.Deadline == DateTime.MinValue ? "          " : task.Deadline.ToShortDateString())} | " +
+            $"{task.Info}";
 
+        private string _PrintSubTasks(Task task, int alignment = 1)
+        {
+            if (task.SubTasks.Count == 0) return "";
+            
+            var result = new StringBuilder();
+            foreach (var subTask in task.SubTasks)
+            {
+                result.Append(" ");
+                result.Append(new string('-', alignment));
+                result.AppendLine(_taskStringFormat(_tasks[subTask]));
+
+                result.Append(_PrintSubTasks(_tasks[subTask], alignment + 1));
+            }
+            
+            return result.ToString();
+        }
+        
         private string _Print(IEnumerable<Task> tasks)
         {
             var result = new StringBuilder(Header);
 
             foreach (var task in tasks.OrderBy(task => task.Completed))
+            {
                 result.AppendLine(_taskStringFormat(task));
+                result.AppendLine(_PrintSubTasks(task));
+            }
 
             return result.ToString();
         }
@@ -81,7 +121,10 @@ namespace NewcomerTask
             var result = new StringBuilder(Header);
 
             foreach (var taskId in taskIds.OrderBy(taskId => _tasks[taskId].Completed))
+            {
                 result.AppendLine(_taskStringFormat(_tasks[taskId]));
+                result.AppendLine(_PrintSubTasks(_tasks[taskId]));
+            }
 
             return result.ToString();
         }
@@ -101,7 +144,7 @@ namespace NewcomerTask
             }
 
             var notInAnyGroupTasks = new StringBuilder();
-            notInAnyGroupTasks.Append(_Print(_tasks.Where(task => !usedTasks.Contains(task.Value.Id)).Select(task => task.Value)));
+            notInAnyGroupTasks.Append(_Print(_tasks.Where(task => !usedTasks.Contains(task.Value.Id) && !task.Value.IsSubTask).Select(task => task.Value)));
 
             if (notInAnyGroupTasks.Length != Header.Length) result.AppendLine("Not in any group:").Append(notInAnyGroupTasks);
 
@@ -141,7 +184,10 @@ namespace NewcomerTask
                 Console.WriteLine("Group with this name doesn't exist!");
         }
 
-        public void AddToGroup(ulong id, string name) => _groups[name].Add(id);
+        public void AddToGroup(ulong id, string name)
+        {
+            if (!_groups[name].Contains(id)) _groups[name].Add(id);
+        }
 
         public void DeleteFromGroup(ulong id, string name) => _groups[name].Delete(id);
     }

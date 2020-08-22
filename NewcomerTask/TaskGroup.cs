@@ -13,6 +13,7 @@ namespace NewcomerTask
 
         public void Add(ulong taskId) => _taskIds.Add(taskId);
         public void Delete(ulong taskId) => _taskIds.Remove(taskId);
+        public bool Contains(ulong taskId) => _taskIds.Contains(taskId);
         public ReadOnlyCollection<ulong> Values() => _taskIds.AsReadOnly();
     }
 }

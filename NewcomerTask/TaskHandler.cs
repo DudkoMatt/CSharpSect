@@ -41,18 +41,14 @@ namespace NewcomerTask
         // File handling
         public void SaveToFile(string filename)
         {
-            using (var f = File.CreateText(filename))
-            {
-                f.Write(JsonConvert.SerializeObject(new Tuple<Dictionary<ulong, Task>, Dictionary<string, TaskGroup>>(_tasks, _groups)));
-            }
+            using var f = File.CreateText(filename);
+            f.Write(JsonConvert.SerializeObject(new Tuple<Dictionary<ulong, Task>, Dictionary<string, TaskGroup>>(_tasks, _groups)));
         }
         
         public void LoadFromFile(string filename)
         {
-            using (var f = File.OpenText(filename))
-            {
-                (_tasks, _groups) = JsonConvert.DeserializeObject<Tuple<Dictionary<ulong, Task>, Dictionary<string, TaskGroup>>>(f.ReadToEnd());
-            }
+            using var f = File.OpenText(filename);
+            (_tasks, _groups) = JsonConvert.DeserializeObject<Tuple<Dictionary<ulong, Task>, Dictionary<string, TaskGroup>>>(f.ReadToEnd());
         }
 
         // Complete handling

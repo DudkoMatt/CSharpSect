@@ -2,7 +2,7 @@
 {
     class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             var taskHandler = new TaskHandler();
             new ConsoleHandler(taskHandler).Run();

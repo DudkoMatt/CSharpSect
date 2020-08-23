@@ -80,7 +80,7 @@ namespace NewcomerTask
                 task.Completed 
                     ? "   x   "
                     : task.SubTasks.Count > 0 
-                        ? $" {task.SubTasks.Select(taskId => _tasks[taskId]).Aggregate(0, (total, funcTask) => funcTask.Completed ? total += 1 : 0), 2}/{task.SubTasks.Count, -2} " 
+                        ? $" {task.SubTasks.Select(taskId => _tasks[taskId]).Aggregate(0, (total, funcTask) => funcTask.Completed ? total + 1 : 0), 2}/{task.SubTasks.Count, -2} " 
                         : "       "
                 )}| " +
             $"{(task.Deadline == DateTime.MinValue ? "          " : task.Deadline.ToShortDateString())} | " +

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using NewcomerTask.TaskHandlerExceptions;
 using Newtonsoft.Json;
 
 namespace NewcomerTask
@@ -21,6 +22,9 @@ namespace NewcomerTask
         // Creation/removal handling
         public ulong AddNewTask(string info, DateTime deadline = default, ulong parent = 0)
         {
+            if (_tasks.Values.Any(t => t.Info == info))
+                throw new TaskAlreadyExistsException("Task with this info already exists");
+
             var task = new Task(info, deadline, parent);
             _tasks.Add(task.Id, task);
             return task.Id;
@@ -35,11 +39,11 @@ namespace NewcomerTask
         public void DeleteTask(ulong id)
         {
             var tasksToDelete = new List<ulong>();
-            
+
             if (_tasks.ContainsKey(id))
-            {
                 _DeleteFromTasks(id, tasksToDelete);
-            }
+            else
+                throw new TaskIdNotFoundException("Cannot find task with specified ID");
 
             if (_tasks[id].IsSubTask)
                 _tasks[_tasks[id].Parent].SubTasks.Remove(id);
@@ -69,15 +73,19 @@ namespace NewcomerTask
         // Complete handling
         public void MarkCompleted(ulong id)
         {
-            if (_tasks.ContainsKey(id)) _tasks[id].Completed = true;
+            if (_tasks.ContainsKey(id))
+                _tasks[id].Completed = !_tasks[id].Completed;
+            else
+                throw new TaskIdNotFoundException("Cannot find task with specified ID");
         }
 
         // Deadline handling
         public void SetDeadline(ulong id, DateTime deadline)
         {
-            if (!_tasks.ContainsKey(id)) return;
+            if (!_tasks.ContainsKey(id)) throw new TaskIdNotFoundException("Cannot find task with specified ID");
+            
             if (_tasks[id].IsSubTask && deadline >= _tasks[_tasks[id].Parent].Deadline)
-                throw new InvalidDataException("Subtask deadline cannot be further than main task deadline");
+                throw new InvalidSubTaskDeadlineException("Subtask deadline cannot be further than main task deadline");
             _tasks[id].Deadline = deadline;
         }
         
@@ -182,7 +190,7 @@ namespace NewcomerTask
         public void CreateGroup(string name)
         {
             if (_groups.ContainsKey(name))
-                Console.WriteLine("Group with this name already exists!");
+                throw new GroupAlreadyExistsException("Group with this name already exists!");
             else
                 _groups.Add(name, new TaskGroup());
         }
@@ -192,14 +200,27 @@ namespace NewcomerTask
             if (_groups.ContainsKey(name))
                 _groups.Remove(name);
             else
-                Console.WriteLine("Group with this name doesn't exist!");
+                throw new GroupNotFoundException("Group with this name doesn't exist!");
         }
 
         public void AddToGroup(ulong id, string name)
         {
-            if (!_groups[name].Contains(id)) _groups[name].Add(id);
+            if (!_groups.ContainsKey(name))
+                throw new GroupNotFoundException("Group with this name doesn't exist!");
+            
+            if (!_groups[name].Contains(id))
+                _groups[name].Add(id);
         }
 
-        public void DeleteFromGroup(ulong id, string name) => _groups[name].Delete(id);
+        public void DeleteFromGroup(ulong id, string name)
+        {
+            if (!_groups.ContainsKey(name))
+                throw new GroupNotFoundException("Group with this name doesn't exist!");
+            
+            if (_groups.ContainsKey(name))
+                _groups[name].Delete(id);
+            else
+                throw new TaskIdNotFoundException($"Cannot find task with specified Id in \"{name}\" group");
+        }
     }
 }

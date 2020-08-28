@@ -52,7 +52,14 @@ namespace NewcomerTask
                 ReadCommand(out var command);
 
                 if (_dictionary.ContainsKey(command))
-                    _dictionary[command]();
+                    try
+                    {
+                        _dictionary[command]();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
                 else
                     Console.WriteLine("Wrong command. Type /help for help");
             }
@@ -182,10 +189,6 @@ namespace NewcomerTask
                     catch (ArgumentOutOfRangeException)
                     {
                         Console.WriteLine("Date is out of range. Format: DD.MM.YYYY");
-                    }
-                    catch (InvalidDataException e)
-                    {
-                        Console.WriteLine(e.Message);
                     }
                 else
                     Console.WriteLine("Cannot parse command. See /help for syntax");

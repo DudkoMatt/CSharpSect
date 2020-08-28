@@ -61,7 +61,7 @@ namespace NewcomerTask
         public void SetDeadline(ulong id, DateTime deadline)
         {
             if (!_tasks.ContainsKey(id)) return;
-            if (_tasks[id].IsSubTask && deadline <= _tasks[_tasks[id].Parent].Deadline)
+            if (_tasks[id].IsSubTask && deadline >= _tasks[_tasks[id].Parent].Deadline)
                 throw new InvalidDataException("Subtask deadline cannot be further than main task deadline");
             _tasks[id].Deadline = deadline;
         }

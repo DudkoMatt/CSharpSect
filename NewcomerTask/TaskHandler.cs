@@ -26,10 +26,25 @@ namespace NewcomerTask
             return task.Id;
         }
 
+        private void _DeleteFromTasks(ulong id, List<ulong> tasksToDelete)
+        {
+            foreach (var subTask in _tasks[id].SubTasks) _DeleteFromTasks(subTask, tasksToDelete);
+            tasksToDelete.Add(id);
+        }
+        
         public void DeleteTask(ulong id)
         {
+            var tasksToDelete = new List<ulong>();
+            
             if (_tasks.ContainsKey(id))
-                _tasks.Remove(id);
+            {
+                _DeleteFromTasks(id, tasksToDelete);
+            }
+
+            if (_tasks[id].IsSubTask)
+                _tasks[_tasks[id].Parent].SubTasks.Remove(id);
+            
+            foreach (var task in tasksToDelete) _tasks.Remove(task);
         }
 
         public void AddSubTask(ulong mainTaskId, string info, DateTime deadline = default)
